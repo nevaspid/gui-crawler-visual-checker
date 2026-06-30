@@ -8,6 +8,8 @@
     "y_depart": 105,
     "x_arrivee": 1363,
     "y_arrivee": 700,
+    "offset_x": 0,
+    "offset_y": 0,
     "largeur_box": 1130,
     "hauteur_box": 595
   },

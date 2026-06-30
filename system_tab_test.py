@@ -16,17 +16,19 @@ config = charger_config()
 config_capture = config["capture"]
 config_application = config["application"]
 
-X_DEPART = config_capture["x_depart"]
-Y_DEPART = config_capture["y_depart"]
-X_ARRIVEE = config_capture["x_arrivee"]
-Y_ARRIVEE = config_capture["y_arrivee"]
-
-OFFSET_X = 0
-OFFSET_Y = 0
+OFFSET_X = config_capture["offset_x"]
+OFFSET_Y = config_capture["offset_y"]
 LARGEUR_BOX = config_capture["largeur_box"]
 HAUTEUR_BOX = config_capture["hauteur_box"]
 
-boite_capture = (X_DEPART, Y_DEPART, X_ARRIVEE, Y_ARRIVEE)
+
+def calculer_boite_capture_dynamique(pane_droite):
+    rect_pane = pane_droite.rectangle()
+    x_depart = rect_pane.left + OFFSET_X
+    y_depart = rect_pane.top + OFFSET_Y
+    x_arrivee = x_depart + LARGEUR_BOX
+    y_arrivee = y_depart + HAUTEUR_BOX
+    return (x_depart, y_depart, x_arrivee, y_arrivee)
 
 # ==========================================
 # 1. RECUPÉRATION AUTOMATIQUE DU PID
@@ -119,6 +121,7 @@ time.sleep(2)
 # ==========================================
 for i, (nom, element) in enumerate(zip(noms_trouves, peripheriques_a_cliquer), 1):
     print(f"[{i}/{nbr_periph}] Sélection de : {nom}...")
+    boite_capture_dynamique = None
     
     # Définition des différents niveaux de parents
     parent1 = element.parent() if hasattr(element, 'parent') else None
@@ -178,6 +181,7 @@ for i, (nom, element) in enumerate(zip(noms_trouves, peripheriques_a_cliquer), 1
         print(f"   [...] Attente du chargement du panneau pour '{nom}'...")
         pane_droite = window.child_window(control_type="Pane", found_index=0)
         pane_droite.wait('ready', timeout=5)
+        boite_capture_dynamique = calculer_boite_capture_dynamique(pane_droite)
         
         textes_trouves = pane_droite.descendants(control_type="TabItem")
         
@@ -242,9 +246,9 @@ for i, (nom, element) in enumerate(zip(noms_trouves, peripheriques_a_cliquer), 1
                 nom_fichier = f"capture_{nom_tab_propre}_{date_str}.png"
                 chemin_complet = os.path.join(nom_dossier_propre, nom_fichier)
                 
-                img = ImageGrab.grab(bbox=boite_capture, include_layered_windows=False)
+                img = ImageGrab.grab(bbox=boite_capture_dynamique, include_layered_windows=False)
                 img.save(chemin_complet)
-                print(f"       [+] Screenshot enregistré : {chemin_complet}")
+                print(f"       [+] Screenshot dynamique enregistré : {chemin_complet}")
                 
             except Exception as e:
                 print(f"       [-] Échec sur l'onglet {nom_tab} : {e}")
@@ -255,9 +259,12 @@ for i, (nom, element) in enumerate(zip(noms_trouves, peripheriques_a_cliquer), 1
             nom_fichier = f"capture_principal_{date_str}.png"
             chemin_complet = os.path.join(nom_dossier_propre, nom_fichier)
             
-            img = ImageGrab.grab(bbox=boite_capture, include_layered_windows=False)
+            if boite_capture_dynamique is None:
+                raise RuntimeError("Boite de capture dynamique indisponible.")
+
+            img = ImageGrab.grab(bbox=boite_capture_dynamique, include_layered_windows=False)
             img.save(chemin_complet)
-            print(f"   [+] Screenshot principal enregistré : {chemin_complet}")
+            print(f"   [+] Screenshot principal dynamique enregistré : {chemin_complet}")
         except Exception as e:
             print(f"   [-] Impossible de générer la capture pour {nom} : {e}")
 
