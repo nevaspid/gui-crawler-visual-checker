@@ -7,7 +7,7 @@ import sys
 import os                     # Pour la création des dossiers
 from datetime import datetime # Pour l'horodatage des fichiers
 from PIL import ImageGrab     # Import direct de Pillow pour un screenshot fixe et fiable
-from config_loader import charger_config
+from config_loader import charger_config, chemin_dossier_run
 
 # ========================================================
 # CONFIGURATION DES COORDONNÉES SCREENSHOT
@@ -15,6 +15,7 @@ from config_loader import charger_config
 config = charger_config()
 config_capture = config["capture"]
 config_application = config["application"]
+dossier_run = chemin_dossier_run(config)
 
 OFFSET_X = config_capture["offset_x"]
 OFFSET_Y = config_capture["offset_y"]
@@ -221,9 +222,10 @@ for i, (nom, element) in enumerate(zip(noms_trouves, peripheriques_a_cliquer), 1
 
     # Préparation du dossier et de la date commune
     nom_dossier_propre = "".join(c for c in nom if c.isalnum() or c in (' ', '_', '-')).strip()
-    if not os.path.exists(nom_dossier_propre):
-        os.makedirs(nom_dossier_propre)
-        print(f"   [+] Dossier créé : {nom_dossier_propre}/")
+    chemin_dossier_periph = os.path.join(dossier_run, nom_dossier_propre)
+    if not os.path.exists(chemin_dossier_periph):
+        os.makedirs(chemin_dossier_periph)
+        print(f"   [+] Dossier créé : {chemin_dossier_periph}/")
     
     date_str = datetime.now().strftime("%d-%m-%Y_%Hh%M")
 
@@ -244,7 +246,7 @@ for i, (nom, element) in enumerate(zip(noms_trouves, peripheriques_a_cliquer), 1
                 # --- CAPTURE DE L'ONGLET EN COURS ---
                 nom_tab_propre = "".join(c for c in nom_tab if c.isalnum() or c in (' ', '_', '-')).strip()
                 nom_fichier = f"capture_{nom_tab_propre}_{date_str}.png"
-                chemin_complet = os.path.join(nom_dossier_propre, nom_fichier)
+                chemin_complet = os.path.join(chemin_dossier_periph, nom_fichier)
                 
                 img = ImageGrab.grab(bbox=boite_capture_dynamique, include_layered_windows=False)
                 img.save(chemin_complet)
@@ -257,7 +259,7 @@ for i, (nom, element) in enumerate(zip(noms_trouves, peripheriques_a_cliquer), 1
         print("   [=] Aucun sous-onglet. Capture de la page principale...")
         try:
             nom_fichier = f"capture_principal_{date_str}.png"
-            chemin_complet = os.path.join(nom_dossier_propre, nom_fichier)
+            chemin_complet = os.path.join(chemin_dossier_periph, nom_fichier)
             
             if boite_capture_dynamique is None:
                 raise RuntimeError("Boite de capture dynamique indisponible.")

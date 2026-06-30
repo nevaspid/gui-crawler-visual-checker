@@ -1,8 +1,7 @@
-import glob
 import os
-import re
 import subprocess
 import sys
+from config_loader import charger_config, chemin_dossier_run
 
 
 SCRIPTS_A_EXECUTER = [
@@ -11,7 +10,6 @@ SCRIPTS_A_EXECUTER = [
 ]
 
 SCRIPT_COMPARAISON = "compare_photos_v3_.py"
-PATTERN_DOSSIER_CAPTURE = re.compile(r"^\d+-")
 
 
 def lancer_script(label, nom_script):
@@ -27,38 +25,25 @@ def lancer_script(label, nom_script):
         sys.exit(resultat.returncode)
 
 
-def dossiers_avec_comparaison_possible():
-    dossier_racine = os.path.dirname(__file__)
-    dossiers = []
-
-    for nom in os.listdir(dossier_racine):
-        chemin_dossier = os.path.join(dossier_racine, nom)
-        if not os.path.isdir(chemin_dossier) or not PATTERN_DOSSIER_CAPTURE.match(nom):
-            continue
-
-        captures = glob.glob(os.path.join(chemin_dossier, "capture_*.png"))
-        if len(captures) >= 2:
-            dossiers.append(nom)
-
-    return dossiers
+def comparaison_configuree(config):
+    config_comparaison = config["comparison"]
+    return bool(config_comparaison["reference_folder"] and config_comparaison["candidate_folder"])
 
 
 def main():
+    config = charger_config()
+    dossier_run = chemin_dossier_run(config)
+
     print("[+] Demarrage du parcours complet.")
+    print(f"[+] Dossier de captures : {dossier_run}")
 
     for label, nom_script in SCRIPTS_A_EXECUTER:
         lancer_script(label, nom_script)
 
-    dossiers_comparables = dossiers_avec_comparaison_possible()
-
-    if not dossiers_comparables:
-        print("\n[=] Comparaison ignoree : aucun dossier avec au moins 2 captures.")
+    if not comparaison_configuree(config):
+        print("\n[=] Comparaison ignoree : reference_folder/candidate_folder non renseignes.")
         print("[+] Parcours termine.")
         return
-
-    print("\n[+] Dossiers comparables detectes :")
-    for nom in dossiers_comparables:
-        print(f"    - {nom}")
 
     lancer_script("Comparaison visuelle", SCRIPT_COMPARAISON)
     print("\n[+] Parcours complet termine.")
