@@ -1,0 +1,20 @@
+{
+  "application": {
+    "process_name": "javaw.exe",
+    "window_title_keyword": "Green"
+  },
+  "capture": {
+    "x_depart": 233,
+    "y_depart": 105,
+    "x_arrivee": 1363,
+    "y_arrivee": 700,
+    "largeur_box": 1130,
+    "hauteur_box": 595
+  },
+  "comparison": {
+    "algorithm": "OPENCV",
+    "ssim_tolerance": 0.95,
+    "max_alignment_shift": 5,
+    "output_filename": "differences_visuelles.png"
+  }
+}

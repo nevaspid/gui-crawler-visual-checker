@@ -7,19 +7,24 @@ import sys
 import os                     # Pour la création des dossiers
 from datetime import datetime # Pour l'horodatage des fichiers
 from PIL import ImageGrab     # Import direct de Pillow pour un screenshot fixe et fiable
+from config_loader import charger_config
 
 # ========================================================
 # CONFIGURATION DES COORDONNÉES SCREENSHOT (MÀJ)
 # ========================================================
-X_DEPART = 233   
-Y_DEPART = 105   
-X_ARRIVEE = 1363  
-Y_ARRIVEE = 700  
+config = charger_config()
+config_capture = config["capture"]
+config_application = config["application"]
+
+X_DEPART = config_capture["x_depart"]
+Y_DEPART = config_capture["y_depart"]
+X_ARRIVEE = config_capture["x_arrivee"]
+Y_ARRIVEE = config_capture["y_arrivee"]
 
 OFFSET_X = 0
 OFFSET_Y = 0
-LARGEUR_BOX = 1130
-HAUTEUR_BOX = 595
+LARGEUR_BOX = config_capture["largeur_box"]
+HAUTEUR_BOX = config_capture["hauteur_box"]
 
 boite_capture = (X_DEPART, Y_DEPART, X_ARRIVEE, Y_ARRIVEE)
 
@@ -28,10 +33,10 @@ boite_capture = (X_DEPART, Y_DEPART, X_ARRIVEE, Y_ARRIVEE)
 # ==========================================
 def trouver_pid_application():
     # Option A : Rechercher par le nom de l'exécutable
-    nom_processus = "javaw.exe" 
+    nom_processus = config_application["process_name"]
     
     # Option B (Plus robuste) : Rechercher un mot-clé dans le titre de la fenêtre
-    mot_cle_fenetre = "Green" 
+    mot_cle_fenetre = config_application["window_title_keyword"]
 
     print(f"Recherche automatique du processus...")
     

@@ -2,11 +2,12 @@ import os
 import time
 import pyautogui
 from PIL import ImageGrab
+from config_loader import charger_config
 
 def capture_depuis_souris():
-    # Configuration des dimensions demandées
-    largeur = 1130
-    hauteur = 595
+    config = charger_config()
+    largeur = config["capture"]["largeur_box"]
+    hauteur = config["capture"]["hauteur_box"]
     
     print("Le script est lancé. Positionnez votre souris...")
     # Attente de 5 secondes

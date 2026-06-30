@@ -5,20 +5,24 @@ import os
 import glob
 import re
 from skimage.metrics import structural_similarity as ssim
+from config_loader import charger_config
 
 # ========================================================
 # CONFIGURATION ET CHOIX DE L'ALGORITHME
 # ========================================================
+config = charger_config()
+config_comparaison = config["comparison"]
+
 # Choix possibles : "OPENCV" (strict + recalage) ou "SSIM" (analyse de formes/structures)
-ALGO_COMPARAISON = "OPENCV" 
+ALGO_COMPARAISON = config_comparaison["algorithm"]
 
 # Seuil de tolérance pour le mode SSIM (0.0 à 1.0)
 # Plus on est proche de 1.0, plus on est strict. 0.95 est le parfait équilibre.
-SEUIL_SSIM_TOLERANCE = 0.95 
+SEUIL_SSIM_TOLERANCE = config_comparaison["ssim_tolerance"]
 
-nom_output = "differences_visuelles.png"
+nom_output = config_comparaison["output_filename"]
 pattern_dossier = re.compile(r"^\d+-")
-MAX_CORRECTION_DECALEUR = 5 
+MAX_CORRECTION_DECALEUR = config_comparaison["max_alignment_shift"]
 
 dossier_racine = os.getcwd()
 print(f"[+] Scan des dossiers depuis la racine : {dossier_racine}")
